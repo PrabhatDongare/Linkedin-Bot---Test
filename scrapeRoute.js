@@ -6,23 +6,23 @@ const router = express.Router();
 export default router.get("/linkedin-login", async (req, res) => {
     try {
         // for running on pc
-        // const browser = await puppeteer.launch({
-        //     headless: false, // See it in action for now - make it false
-        //     slowMo: 500,      // Slow down to simulate human-like interaction
-        //     args: ["--no-sandbox", "--disable-setuid-sandbox"]
-        // });
+        const browser = await puppeteer.launch({
+            headless: false, // See it in action for now - make it false
+            slowMo: 500,      // Slow down to simulate human-like interaction
+            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        });
 
         // for running on server
-        const browser = await puppeteer.launch({
-            headless: "new", // or true for older versions; "new" is recommended in latest versions
-            args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",           // Avoids shared memory issues
-                // "--disable-gpu",                     // Disable GPU for stability (optional)
-                "--window-size=1920,1080"            // Set screen size for layout consistency
-            ]
-        });
+        // const browser = await puppeteer.launch({
+        //     headless: "new", // or true for older versions; "new" is recommended in latest versions
+        //     args: [
+        //         "--no-sandbox",
+        //         "--disable-setuid-sandbox",
+        //         "--disable-dev-shm-usage",           // Avoids shared memory issues
+        //         // "--disable-gpu",                     // Disable GPU for stability (optional)
+        //         "--window-size=1920,1080"            // Set screen size for layout consistency
+        //     ]
+        // });
 
         const page = await browser.newPage();
 
