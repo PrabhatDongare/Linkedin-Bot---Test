@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import scrapeRoute from "./scrapeRoute.js";
+// import scrapeRoute from "./scrapeRoute.js";
+import { collectPosts } from "./linkedinScraper.js";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -20,7 +21,16 @@ app.get("/", (req, res) => {
     }
 });
 
-app.use(scrapeRoute);
+app.get("/scrapePosts", async (req, res) => {
+    try {
+        const results = await collectPosts();
+        res.status(200).json({ success: true, data: results });
+    } catch (error) {
+        console.error("LinkedIn automation error:", error);
+        res.status(500).json({ success: false, message: "Login failed" });
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`BACKEND listening on port ${port}`);
