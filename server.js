@@ -32,6 +32,6 @@ app.get("/scrapePosts", async (req, res) => {
 });
 
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`BACKEND listening on port ${port}`);
 });
