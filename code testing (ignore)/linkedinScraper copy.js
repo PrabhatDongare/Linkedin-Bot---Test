@@ -112,8 +112,8 @@ export async function collectPosts() {
     // await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
     await page.goto("https://www.linkedin.com/login", { waitUntil: "networkidle2" });
-    await page.type("#username", process.env.LINKEDIN_EMAIL, { delay: randomDelay() });
-    await page.type("#password", process.env.LINKEDIN_PASSWORD, { delay: randomDelay() });
+    await page.type("#username", "easyedits198@gmail.com", { delay: randomDelay() });
+    await page.type("#password", "w(VR5_N)mKJ7P$Z", { delay: randomDelay() });
 
     // -> Uncheck "Remember me" if checked
     const checkboxSelector = "#remember-me-checkbox";
@@ -126,24 +126,17 @@ export async function collectPosts() {
     await Promise.all([page.click('button[type="submit"]'), page.waitForNavigation({ waitUntil: "networkidle2" }),]);
 
     // -> Navigate to search page
-    await page.goto("https://www.linkedin.com/search/results/content/?keywords=%22backend%22%20%2B%20%22hiring%22%20%2B%20%22mail%22&origin=FACETED_SEARCH&sid=XO~&sortBy=%22date_posted%22", { waitUntil: "networkidle2", });
-    await page.waitForSelector("ul.OExZJqtfkbKHeGNtaOVWIdXWssQgXVLodQ", { timeout: 5000 });
+    await page.goto("https://www.linkedin.com/search/results/content/?keywords=%22backend%22%20%2B%20%22hiring%22%20%2B%20%22mail%22&origin=FACETED_SEARCH&sid=iKM&sortBy=%22date_posted%22", { waitUntil: "networkidle2", });
+    await page.waitForSelector("li.artdeco-card", { timeout: 5000 });
 
     // Scroll to load more posts (optional)
     await autoScroll(page, 4, 1000); // scroll 4 times with 1 sec delay
 
-    // Extract all <li class="artdeco-card"> inside <ul class="OExZJqtfkbKHeGNtaOVWIdXWssQgXVLodQ">
+    // Extract all li.artdeco-card elements directly from the page
     const postHtmlArray = await page.$$eval(
-        'ul.OExZJqtfkbKHeGNtaOVWIdXWssQgXVLodQ',
-        (ulElements) => {
-            const posts = [];
-            for (const ul of ulElements) {
-                const liCards = ul.querySelectorAll("li.artdeco-card");
-                liCards.forEach((li) => {
-                    posts.push(li.outerHTML);
-                });
-            }
-            return posts;
+        'li.artdeco-card',
+        (liElements) => {
+            return liElements.map(li => li.outerHTML);
         }
     );
 
@@ -161,4 +154,6 @@ export async function collectPosts() {
     console.log("Code ran successfully.");
 }
 
-collectPosts();
+// collectPosts();
+
+
