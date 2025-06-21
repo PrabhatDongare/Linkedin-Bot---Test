@@ -1,0 +1,73 @@
+# Update package list
+sudo yum update -y
+
+# Install git
+sudo yum install -y git
+
+# Install Node.js v22
+curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
+sudo yum install -y nodejs
+
+# Verify versions
+node --version
+npm --version
+
+# Navigate to home directory
+cd ~
+
+# Clone your repository (replace with your actual GitHub URL)
+git clone _
+
+# Navigate into the project directory
+cd Linkedin-Bot---Test
+
+# Install project dependencies
+npm install
+npm install puppeteer-extra puppeteer-extra-plugin-stealth
+
+# Install Chrome dependencies
+sudo yum install -y \
+    alsa-lib \
+    atk \
+    cups-libs \
+    gtk3 \
+    ipa-gothic-fonts \
+    libXcomposite \
+    libXcursor \
+    libXdamage \
+    libXext \
+    libXi \
+    libXrandr \
+    libXScrnSaver \
+    libXtst \
+    pango \
+    xorg-x11-fonts-100dpi \
+    xorg-x11-fonts-75dpi \
+    xorg-x11-fonts-cyrillic \
+    xorg-x11-fonts-misc \
+    xorg-x11-fonts-Type1 \
+    xorg-x11-utils
+
+# Download and install Google Chrome
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+sudo yum install -y google-chrome-stable_current_x86_64.rpm
+
+# Clean up the downloaded file
+rm google-chrome-stable_current_x86_64.rpm
+
+# Verify Chrome installation
+google-chrome --version
+
+# Create .env file
+nano .env
+
+# install pm2
+sudo npm install -g pm2
+pm2 --version
+pm2 start server.js --name app
+pm2 list
+pm2 delete app
+pm2 restart app
+pm2 kill app
+pm2 logs app
+pm2 flush app

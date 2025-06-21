@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 import dotenv from "dotenv";
 import * as cheerio from "cheerio";
 import { sub, formatISO } from "date-fns";
+import { writeFileSync } from 'fs';
 dotenv.config();
 
 function randomDelay() {
@@ -88,7 +89,7 @@ export async function collectPosts() {
     const browser = await puppeteer.launch({
         headless: false,
         slowMo: 500, // Slow down to simulate human-like interaction
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: ["--no-sandbox", "--disable    -setuid-sandbox"],
     });
 
     // -> makes browser headless
@@ -111,49 +112,68 @@ export async function collectPosts() {
     // -> for desktop view
     // await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
+    console.log('Going to Google Home Page');
+    await page.goto("https://www.google.com", { waitUntil: "networkidle2" });
+    console.log('Going to Login Pge');
     await page.goto("https://www.linkedin.com/login", { waitUntil: "networkidle2" });
+    console.log('Attempting to login...');
+    console.log("Login page URL:", page.url());
     await page.type("#username", "easyedits198@gmail.com", { delay: randomDelay() });
     await page.type("#password", "w(VR5_N)mKJ7P$Z", { delay: randomDelay() });
 
     // -> Uncheck "Remember me" if checked
-    const checkboxSelector = "#remember-me-checkbox";
-    if (await page.$(checkboxSelector)) {
-        const isChecked = await page.$eval(checkboxSelector, (el) => el.checked);
-        if (isChecked) await page.click(checkboxSelector);
+    const checkboxSelector = '#rememberMeOptIn-checkbox';
+    await page.waitForSelector(checkboxSelector, { timeout: 1000 });
+    if (checkboxSelector) {
+        await page.evaluate(selector => {
+            const checkbox = document.querySelector(selector);
+            if (checkbox) {
+                checkbox.checked = false;
+                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }, checkboxSelector);
+        const isNowChecked = await page.$eval(checkboxSelector, el => el.checked);
+        console.log(isNowChecked ? '❌ Still checked!' : '✅ Successfully unchecked!');
     }
 
     // -> Click Sign in button
     await Promise.all([page.click('button[type="submit"]'), page.waitForNavigation({ waitUntil: "networkidle2" }),]);
+    console.log('Login successful');
 
     // -> Navigate to search page
-    await page.goto("https://www.linkedin.com/search/results/content/?keywords=%22backend%22%20%2B%20%22hiring%22%20%2B%20%22mail%22&origin=FACETED_SEARCH&sid=iKM&sortBy=%22date_posted%22", { waitUntil: "networkidle2", });
-    await page.waitForSelector("li.artdeco-card", { timeout: 5000 });
+    await page.goto("https://www.linkedin.com/search/results/content/?keywords=%22backend%22%20%2B%20%22hiring%22%20%2B%20%22mail%22&origin=FACETED_SEARCH&sid=XO~&sortBy=%22date_posted%22", { waitUntil: "networkidle2", });
+    console.log("Reached Posts Page");
+    console.log("Post page URL:", page.url());
+    const postPageHtml = await page.content();
+    writeFileSync('debug.html', postPageHtml);
+    await page.waitForSelector("li.artdeco-card", { timeout: 10000 });
 
     // Scroll to load more posts (optional)
     await autoScroll(page, 4, 1000); // scroll 4 times with 1 sec delay
+    console.log('Scrolling to load more posts...');
 
     // Extract all li.artdeco-card elements directly from the page
-    const postHtmlArray = await page.$$eval(
-        'li.artdeco-card',
-        (liElements) => {
-            return liElements.map(li => li.outerHTML);
-        }
-    );
+    // const postHtmlArray = await page.$$eval(
+    //     'li.artdeco-card',
+    //     (liElements) => {
+    //         return liElements.map(li => li.outerHTML);
+    //     }
+    // );
+    // console.log(`Found ${postHtmlArray.length} posts`);
 
     // Feed to extractPostData()
-    const results = [];
-    for (const postHtml of postHtmlArray) {
-        const postData = extractPostData(postHtml);
-        if (postData) {
-            results.push(postData);
-        }
-    }
+    // const results = [];
+    // for (const postHtml of postHtmlArray) {
+    //     const postData = extractPostData(postHtml);
+    //     if (postData) {
+    //         results.push(postData);
+    //     }
+    // }
+
 
     await browser.close();
-    console.log(results);
-    console.log("Code ran successfully.");
+    // return results;
 }
 
-// collectPosts();
-
-
+collectPosts();
+// need to add try-catch block to handle errors throughout the code
